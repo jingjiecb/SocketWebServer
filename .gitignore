@@ -1,0 +1,11 @@
+# IntelliJ files
+*.iml
+.idea/**
+
+#Python cache
+
+__pycache__/
+
+# downloadResult
+result/**
+out/
