@@ -1,3 +1,5 @@
+import Parser.Parser;
+
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
@@ -27,15 +29,24 @@ public class TaskThread extends Thread {
             //读取请求
             reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
 
-            String line;
-            char[] postContent = new char[100];
-            do {
-                line = reader.readLine();
-                System.out.println(line);
-            } while (!line.equals(""));
+            // String line;
+            char[] postContent = new char[1024];
+            // do {
+            //     line = reader.readLine();
+            //     System.out.println(line);
+            // } while (!line.equals(""));
             int co = reader.read(postContent);
             assert co>0;
-            System.out.println(postContent);
+            // System.out.println(postContent);
+            Parser parser = new Parser(postContent);
+            parser.print();
+            System.out.println("****************");
+            String path = parser.getPath();
+            String content = parser.getContent();
+            String cookie = parser.getCookie();
+            System.out.println(path);
+            System.out.println(cookie);
+            System.out.println(content);
             System.out.println("****************");
 
             firstLineOfRequest = reader.readLine();
