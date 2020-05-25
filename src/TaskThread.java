@@ -31,7 +31,7 @@ public class TaskThread extends Thread {
             char[] postContent = new char[100];
             do {
                 line = reader.readLine();
-                // System.out.println(line);
+                System.out.println(line);
             } while (!line.equals(""));
             int co = reader.read(postContent);
             assert co>0;
