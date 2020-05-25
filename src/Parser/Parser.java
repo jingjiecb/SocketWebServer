@@ -8,18 +8,30 @@ public class Parser {
     //请求的每一行
     private String[] lines;
 
+
     /**
      * 构造方法
+     *
      * @param request 接受请求内容，构造解析器
      */
-    public Parser(char[] request){
-        String requestStr=String.valueOf(request).replaceAll("[\r\u0000]","");
+    public Parser(char[] request) {
+        String requestStr = String.valueOf(request).replaceAll("[\r\u0000]", "");
         // System.out.println("total length: "+requestStr.length());
-        this.lines=requestStr.split("\n");
+        this.lines = requestStr.split("\n");
+    }
+
+    /**
+     * 得到请求的方法
+     *
+     * @return 如果是Get返回0，如果是Post（或其他）返回1
+     */
+    public int getMethod() {
+        return lines[0].split(" ")[0].equals("GET") ? 0 : 1;
     }
 
     /**
      * 获得访问资源地址，位于头部第一行
+     *
      * @return 资源地址
      */
     public String getPath() {
@@ -28,7 +40,8 @@ public class Parser {
 
     /**
      * 获得Cookie，位于头部某行内
-     * @return Cookie内容
+     *
+     * @return Cookie所有内容
      */
     public String getCookie() {
         for (String line : lines) {
@@ -38,33 +51,60 @@ public class Parser {
     }
 
     /**
+     * 获得一个指定的Cookie字段
+     *
+     * @param key 字段的key
+     * @return 字段内容
+     */
+    public String getCookieByKey(String key) {
+        String cookie = "";
+        for (String line : lines) {
+            if (line.startsWith("Cookie:")) {
+                cookie = line.substring(8);
+                break;
+            }
+        }
+
+        String[] sessions = cookie.split(" ");
+        for (String session : sessions) {
+            if (session.split("=")[0].equals(key)) {
+                return session;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * 获得请求体
+     *
      * @return 请求体内容
      */
     public String getContent() {
         int i;
-        for (i=0;i<lines.length;i++){
-            if (lines[i].length()<=1) break;
+        for (i = 0; i < lines.length; i++) {
+            if (lines[i].length() <= 1) break;
         }
         i++;
 
-        StringBuilder res= new StringBuilder();
+        StringBuilder res = new StringBuilder();
 
-        for (;i<lines.length;i++){
+        for (; i < lines.length; i++) {
             res.append(lines[i]);
             res.append('\n');
         }
-        res.deleteCharAt(res.length()-1);
+        res.deleteCharAt(res.length() - 1);
 
         return res.toString();
     }
 
 
     //测试方法
-    public void print(){
-        for (int i=0;i<lines.length;i++){
-            System.out.println(""+(i+1)+"  "+lines[i]);
+    public void print() {
+        for (int i = 0; i < lines.length; i++) {
+            System.out.println("" + (i + 1) + "  " + lines[i]);
             // System.out.println("  "+lines[i].length());
         }
+        System.out.println("****************");
     }
 }

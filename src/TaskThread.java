@@ -1,103 +1,92 @@
+import DAO.*;
 import Parser.Parser;
+import Responser.*;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.Socket;
 
 
 public class TaskThread extends Thread {
-    private Socket s;
 
-    public TaskThread(Socket s) throws IOException {
+    private static final String BASEPATH = "D:/2019-2020学年第二学期/课程材料/互联网计算/大作业/web";
+
+    private Socket s;
+    Responser responser;
+    UserDao userDao = UserDaoImpl.getUserDaoInstance();
+    CookieDao cookieDao = CookieDaoImpl.getCookieDaoInstance();
+
+
+    public TaskThread(Socket s) {
         this.s = s;
     }
 
     public void run() {
         BufferedReader reader;
-        PrintStream writer;
-        FileInputStream in;
-        DataOutputStream os;
-        String firstLineOfRequest;
+        char[] postContent;
 
         try {
+            OutputStream outputStream = s.getOutputStream();
             //读取请求
+            postContent = new char[1024];
             reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-
-            // String line;
-            char[] postContent = new char[1024];
-            // do {
-            //     line = reader.readLine();
-            //     System.out.println(line);
-            // } while (!line.equals(""));
             int co = reader.read(postContent);
-            assert co>0;
-            // System.out.println(postContent);
+            assert co > 0;
+
+            //解析请求
             Parser parser = new Parser(postContent);
             parser.print();
-            System.out.println("****************");
-            String path = parser.getPath();
-            String content = parser.getContent();
-            String cookie = parser.getCookie();
-            System.out.println(path);
-            System.out.println(cookie);
-            System.out.println(content);
-            System.out.println("****************");
 
-            firstLineOfRequest = reader.readLine();
-            String uri = firstLineOfRequest.split(" ")[1];
 
-            //读文件，写应答
-            writer = new PrintStream(s.getOutputStream());
-            File file = new File("D:/2019-2020学年第二学期/课程材料/互联网计算/大作业/web" + uri);
-            if (file.exists()) {
-                writer.println("HTTP/1.1 200 OK");//返回应答消息，并结束应答
-                if (uri.endsWith(".html")) {
-                    writer.println("Content-Type:text/html");
-                } else if (uri.endsWith(".jpg")) {
-                    writer.println("Content-Type:image/jpeg");
-                } else if (uri.endsWith(".css")) {
-                    writer.println("Content-Type:text/css");
-                } else {
-                    writer.println("Content-Type:application/octet-stream");
+            if (parser.getMethod() == 1) {
+                String content = parser.getContent();
+                String[] pair = content.split("&");
+                String userName = (pair[0].split("="))[1];
+                String passwd = (pair[1].split("="))[1];
+
+                String path=parser.getPath();
+
+                if (path.equals("/login")) {
+                    if (userDao.isMatch(userName, passwd)) {
+                        responser = new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName));
+                        responser.send();
+                    } else {
+                        responser = new C301Responser(outputStream, "http://localhost:8888/login.html");
+                        responser.send();
+                    }
+                } else if (path.equals("/register")){
+                    userDao.addUser(userName,passwd);
+                    responser = new C301Responser(outputStream, "http://localhost:8888/login.html");
+                    responser.send();
                 }
-                in = new FileInputStream("D:/2019-2020学年第二学期/课程材料/互联网计算/大作业/web" + uri);
-                //发送响应头
-                writer.println("Content-Lenth:" + in.available());
-                writer.println();
-                writer.flush();
-                //发送响应体
-                os = new DataOutputStream(s.getOutputStream());
-                byte[] b = new byte[1024];
-                int len = 0;
-                len = in.read(b);
-                while (len != -1) {
-                    os.write(b, 0, len);
-                    len = in.read(b);
-                }
-                os.flush();
-                writer.close();
+
             } else {
-                //发送响应头
-                writer.println("HTTP/1.1 404 Not Found");
-                writer.println("Content-Type:text/plain");
-                writer.println("Content-Length:7");
-                writer.println();
-                //发送响应体
-                writer.print("访问内容不存在");
-                writer.flush();
-                writer.close();
+                String rawPath = parser.getPath();
+
+                String nameCookie = parser.getCookieByKey("username");
+                System.out.println(nameCookie);
+                if (!cookieDao.isValid(nameCookie) &&
+                        !rawPath.equals("/login.html") &&
+                        !rawPath.equals("/register.html")) {
+                    responser = new C301Responser(outputStream, "http://localhost:8888/login.html");
+                    responser.send();
+                } else {
+
+                    //尝试发送文件
+
+                    String path = BASEPATH + rawPath;
+                    responser = new MIMEResponser(outputStream, path);
+                    if (!responser.send()) {//如果文件不存在，发送404应答
+                        responser = new C404Responser(outputStream);
+                        responser.send();
+                    }
+
+                    s.close();
+                }
             }
-            s.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-
     }
+
 }
