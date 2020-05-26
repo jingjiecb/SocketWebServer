@@ -10,7 +10,7 @@
 
 ## 使用说明
 
-根目录请在Controller.Controller的第14行设置。
+根目录请在Responser.Responser中的静态常量。
 
 运行前请确保根目录中至少有以下三个文件：
 
