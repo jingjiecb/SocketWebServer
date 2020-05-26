@@ -2,9 +2,8 @@ package Responser;
 
 import java.io.*;
 
-public class MIMEResponser implements Responser {
+public class MIMEResponser extends Responser {
 
-    private OutputStream outputStream;
     private String path;
 
 

@@ -23,10 +23,10 @@ public class Parser {
     /**
      * 得到请求的方法
      *
-     * @return 如果是Get返回0，如果是Post（或其他）返回1
+     * @return 请求的方法。注意是大写字母
      */
-    public int getMethod() {
-        return lines[0].split(" ")[0].equals("GET") ? 0 : 1;
+    public String getMethod() {
+        return lines[0].split(" ")[0];
     }
 
     /**

@@ -3,9 +3,8 @@ package Responser;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class C301Responser implements Responser {
+public class C301Responser extends Responser {
 
-    private OutputStream outputStream;
     private String url;
 
     public C301Responser(OutputStream outputStream, String url) {
