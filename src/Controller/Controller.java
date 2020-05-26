@@ -134,7 +134,8 @@ public class Controller {
     private void sendFile() throws Exception {
         String path = BASEPATH + parser.getPath();
         new MIMEResponser(outputStream, path);
-        if (new MIMEResponser(outputStream, path).send()) {//如果文件不存在，发送404应答
+        if (!new MIMEResponser(outputStream, path).send()) {//如果文件不存在，发送404应答
+            System.out.println("info ===> 404: "+path);
             new C404Responser(outputStream).send();
         }
     }
