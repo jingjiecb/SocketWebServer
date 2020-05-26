@@ -6,10 +6,9 @@ public class MIMEResponser extends Responser {
 
     private String path;
 
-
     public MIMEResponser(OutputStream outputStream, String path) {
         this.outputStream=outputStream;
-        this.path=path;
+        this.path=BASEPATH+path;
     }
 
     /**

@@ -10,8 +10,6 @@ import Responser.*;
 import java.io.OutputStream;
 
 public class Controller {
-    //资源根目录
-    private static final String BASEPATH = "D:/2019-2020学年第二学期/课程材料/互联网计算/大作业/web";
 
     //请求解析器
     private Parser parser;
@@ -97,11 +95,11 @@ public class Controller {
             if (userDao.isMatch(userName, passwd)) {//如果用户密码正确，颁发一个cookie给浏览器
                 new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName)).send();
             } else {//如果用户密码错误，则重定向回登陆页面
-                new C301Responser(outputStream, "http://localhost:8888/login.html").send();
+                new C301Responser(outputStream, "/login.html").send();
             }
         } else if (path.equals("/register")) {//如果是来自于注册页面的post，添加一个用户
             userDao.addUser(userName, passwd);
-            new C301Responser(outputStream, "http://localhost:8888/login.html").send();
+            new C301Responser(outputStream, "/login.html").send();
         }
     }
 
@@ -114,14 +112,14 @@ public class Controller {
         String nameCookie = parser.getCookieByKey("username");
 
         if (!cookieDao.isValid(nameCookie)) {
-            if (!interceptBeforeLogin()) new C301Responser(outputStream, "http://localhost:8888/login.html").send();
+            if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
             else sendFile();
         } else {
             if (!interceptAfterLogin()) new C404Responser(outputStream);
             else {
                 String redirectPath = redirect();
                 if (redirectPath.equals("")) sendFile();
-                else new C301Responser(outputStream, redirectPath).send();
+                else new C302Responser(outputStream, redirectPath).send();
             }
         }
     }
@@ -132,8 +130,7 @@ public class Controller {
      * @throws Exception 各种异常
      */
     private void sendFile() throws Exception {
-        String path = BASEPATH + parser.getPath();
-        new MIMEResponser(outputStream, path);
+        String path = parser.getPath();
         if (!new MIMEResponser(outputStream, path).send()) {//如果文件不存在，发送404应答
             System.out.println("info ===> 404: "+path);
             new C404Responser(outputStream).send();

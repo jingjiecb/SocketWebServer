@@ -35,6 +35,7 @@ public class TaskThread extends Thread {
             Controller controller=new Controller();
             controller.process(parser,outputStream);
 
+            s.close();
         } catch (Exception e) {
             e.printStackTrace();
             new C500Responser(s).send();

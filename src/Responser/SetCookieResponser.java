@@ -17,7 +17,7 @@ public class SetCookieResponser extends Responser {
         PrintStream writer = new PrintStream(outputStream);
         writer.println("HTTP/1.1 301 Move Permanently");
         writer.println("Set-Cookie: "+cookie);
-        writer.println("Location: http://localhost:8888/index.html");
+        writer.println("Location: "+BASEURL+"/index.html");
         writer.flush();
         writer.close();
         return true;

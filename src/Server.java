@@ -7,7 +7,7 @@ public class Server {
         ServerSocket ss=null;
 
         try {
-            ss=new ServerSocket(8888);
+            ss=new ServerSocket(9000);
         } catch (IOException e) {
             e.printStackTrace();
         }
