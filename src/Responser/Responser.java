@@ -9,7 +9,8 @@ import java.io.PrintStream;
 abstract public class Responser {
 
     //资源基地址
-    protected static final String BASEURL="http://127.0.0.1:9000";
+    //不使用基地址
+    // protected static final String BASEURL="http://127.0.0.1:9000";
 
     //资源根目录
     protected static final String BASEPATH = "/root/web";

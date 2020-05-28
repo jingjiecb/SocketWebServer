@@ -13,6 +13,8 @@ import java.util.Date;
 
 public class Controller {
 
+    private static final String URL_HOME = "http://127.0.0.1:9000";
+
     //请求解析器
     private Parser parser;
     //socket输出流
@@ -95,13 +97,16 @@ public class Controller {
 
         if (path.equals("/login")) {//如果是来自登陆页面的post
             if (userDao.isMatch(userName, passwd)) {//如果用户密码正确，颁发一个cookie给浏览器
-                new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName)).send();
+                new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName), URL_HOME).send();
             } else {//如果用户密码错误，则重定向回登陆页面
-                new C301Responser(outputStream, "/login.html").send();
+                new C301Responser(outputStream, URL_HOME + "/login.html").send();
             }
         } else if (path.equals("/register")) {//如果是来自于注册页面的post，添加一个用户
-            userDao.addUser(userName, passwd);
-            new C301Responser(outputStream, "/login.html").send();
+            if (userDao.addUser(userName, passwd)) {
+                new C301Responser(outputStream, URL_HOME + "/login.html").send();//注册成功跳转到登陆页面
+            } else {
+                new C301Responser(outputStream, URL_HOME + "/register.html").send();//注册失败跳转到注册页面
+            }
         }
     }
 
@@ -114,17 +119,16 @@ public class Controller {
         String nameCookie = parser.getCookieByKey("username");
 
         if (!cookieDao.isValid(nameCookie)) {
-            if(!parser.hasCheckModified()) {
+            if (!parser.hasCheckModified()) {
                 // no 304 check
-                if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
+                if (!interceptBeforeLogin()) new C302Responser(outputStream, URL_HOME + "/login.html").send();
                 else sendFile();
-            }
-            else{
+            } else {
                 // check if 304
                 File theFile = new File(parser.getPath());
                 Date fileLastModTime = new Date(theFile.lastModified());
                 Date clientModSince = parser.getModifiedDate();
-                if(fileLastModTime.getTime() > clientModSince.getTime()){
+                if (fileLastModTime.getTime() > clientModSince.getTime()) {
                     sendFile();
                 } else {
                     new C304Responser(outputStream).send();
@@ -148,7 +152,7 @@ public class Controller {
     private void sendFile() throws Exception {
         String path = parser.getPath();
         if (!new MIMEResponser(outputStream, path).send()) {//如果文件不存在，发送404应答
-            System.out.println("info ===> 404: "+path);
+            System.out.println("info ===> 404: " + path);
             new C404Responser(outputStream).send();
         }
     }
