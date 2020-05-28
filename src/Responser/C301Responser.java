@@ -16,7 +16,7 @@ public class C301Responser extends Responser {
     public boolean send() throws Exception {
         PrintStream writer = new PrintStream(outputStream);
         writer.println("HTTP/1.1 301 Goto");
-        writer.println("Location: "+BASEURL+url);
+        writer.println("Location: " + url);
         writer.flush();
         writer.close();
         return true;

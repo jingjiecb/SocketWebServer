@@ -3,20 +3,17 @@ package Responser;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
-public class C302Responser extends Responser {
+public class C304Responser extends Responser {
 
-    private String url;
-
-    public C302Responser(OutputStream outputStream, String url) {
+    public C304Responser(OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.url=url;
     }
 
     @Override
     public boolean send() throws Exception {
         PrintStream writer = new PrintStream(outputStream);
-        writer.println("HTTP/1.1 302 Goto");
-        writer.println("Location: " + url);
+        writer.println("HTTP/1.1 304 NotModified");
+        // tell the client/browser that it can use its buffer
         writer.flush();
         writer.close();
         return true;

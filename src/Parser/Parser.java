@@ -1,5 +1,11 @@
 package Parser;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * parser实例接收char[]形式的http报文的内容，可以对其进行解析，得到有价值的信息。
  */
@@ -18,6 +24,7 @@ public class Parser {
         String requestStr = String.valueOf(request).replaceAll("[\r\u0000]", "");
         // System.out.println("total length: "+requestStr.length());
         this.lines = requestStr.split("\n");
+        // Why Not Directly .split("\r\n")????
     }
 
     /**
@@ -98,6 +105,58 @@ public class Parser {
         return res.toString();
     }
 
+    public boolean hasCheckModified(){
+        // check if possibly response HTTP 304
+        String rawDateStr = "";
+        for(String line: lines){
+            if(line.startsWith("if-modified-since: ")){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public Date getModifiedDate(){
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHH:mm:ss");
+        Date date = null;
+        try {
+//            String dateString = "Thu, 25 Feb 2016 12:18:19 GMT";
+            String dateString = "";
+            for(String line: lines){
+                if(line.startsWith("if-modified-since: ")){
+                    dateString = line.substring(19);
+                }
+            }
+            String[] dateStringSplitArr = dateString.split(" ");
+            String newDateString = dateStringSplitArr[3] + parseToMM(dateStringSplitArr[2]) + dateStringSplitArr[1] + dateStringSplitArr[4];
+//          Date String Example:  date = sdf.parse("Thu, 25 Feb 2016 12:18:19 GMT");
+            date = sdf.parse(newDateString);
+            System.out.println(date.toString());
+        }catch (ParseException pe){
+            System.out.println("Oops! Modified Date Parse Exception!");
+        }
+        return date;
+    }
+
+    private static String parseToMM(String month){
+        month = month.toLowerCase();
+        String MM = "-1";
+        Map<String, String> monthMap = new HashMap<>();
+        monthMap.put("jan", "01");
+        monthMap.put("feb", "02");
+        monthMap.put("mar", "03");
+        monthMap.put("apr", "04");
+        monthMap.put("may", "05");
+        monthMap.put("jun", "06");
+        monthMap.put("jul", "07");
+        monthMap.put("aug", "08");
+        monthMap.put("sep", "09");
+        monthMap.put("oct", "10");
+        monthMap.put("nov", "11");
+        monthMap.put("dec", "12");
+        MM = monthMap.get(month);
+        return MM;
+    }
 
     //测试方法
     public void print() {

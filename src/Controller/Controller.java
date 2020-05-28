@@ -7,7 +7,9 @@ import DAO.UserDaoImpl;
 import Parser.Parser;
 import Responser.*;
 
+import java.io.File;
 import java.io.OutputStream;
+import java.util.Date;
 
 public class Controller {
 
@@ -112,8 +114,22 @@ public class Controller {
         String nameCookie = parser.getCookieByKey("username");
 
         if (!cookieDao.isValid(nameCookie)) {
-            if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
-            else sendFile();
+            if(!parser.hasCheckModified()) {
+                // no 304 check
+                if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
+                else sendFile();
+            }
+            else{
+                // check if 304
+                File theFile = new File(parser.getPath());
+                Date fileLastModTime = new Date(theFile.lastModified());
+                Date clientModSince = parser.getModifiedDate();
+                if(fileLastModTime.getTime() > clientModSince.getTime()){
+                    sendFile();
+                } else {
+                    new C304Responser(outputStream).send();
+                }
+            }
         } else {
             if (!interceptAfterLogin()) new C404Responser(outputStream);
             else {
