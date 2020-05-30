@@ -4,6 +4,8 @@ import java.util.ArrayList;
 
 public class CookieDaoImpl implements CookieDao {
 
+    private static final int VALID_TIME=60000;
+
     private ArrayList<Cookie> cookies;
 
     private CookieDaoImpl() {
@@ -24,7 +26,7 @@ public class CookieDaoImpl implements CookieDao {
             Cookie cookie = cookies.get(i);
 
             if ((cookie.toString()).equals(cookieStr)) {
-                if (System.currentTimeMillis() - cookie.getTime() <= 60000) {//单位是毫秒
+                if (System.currentTimeMillis() - cookie.getTime() <= VALID_TIME) {//单位是毫秒
                     cookie.updataTime();//cookie存在且未失效，则更新cookie时间
                     return true;
                 } else {
