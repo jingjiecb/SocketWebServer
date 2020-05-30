@@ -13,7 +13,7 @@ import java.util.Date;
 
 public class Controller {
 
-    private static final String URL_HOME = "http://127.0.0.1:9000";
+    private static final String URL_HOME = "http://js.aegean19.top:9000";
 
     //请求解析器
     private Parser parser;
