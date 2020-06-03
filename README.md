@@ -15,31 +15,15 @@
 
 ## 部署说明
 
-### Step1 准备根目录
+### 部署方法一：源代码打包构建
 
-确保你的网站根目录下有如下三个文件：
+**简单修改源代码（可选）**：
 
-1. login.html
-2. register.html
-3. index.html
+1. 将Responser包中`Responser.java`中第16行，可以将`BASEPATH`常量改为你期望的网站根目录。
 
-我已经在resources/中提供了一个参考版本，你可以简单修改之后使用，也可以编写自己的，但是有以下2点必须注意：
+2. 为了避免冲突，默认端口是`9000`。如果需要更改，需要将`Server.java`中第10行中的端口改掉。
 
-1. 将login.html中的表单(form)的action属性改为`你的服务器地址:端口号+/login`，将register.html中表单的action属性改为`你的服务器地址:端口号+/register`
-2. 将所有url修改为你的url。
-
-### Step2 简单修改代码
-
-**！！首先必须要改的位置**有：
-
-1. Controller包的`Controller.java`中第16行，将`URL_HOME`常量改为你的URL，以确保一些内置的跳转正常。
-2. 将Responser包中`Responser.java`中第16行，将`BASEPATH`常量改为你的网站根目录。
-
-**可选的更改**有：
-
-1. 为了避免冲突，默认端口是`9000`。如果需要更改，需要将`Server.java`中第10行中的端口改掉。
-
-2. Controller包的`Controller.java`中第78行，有如下方法：
+3. Controller包的`Controller.java`中第78行，有如下方法：
 
    ```java
    private String redirect() {
@@ -57,13 +41,44 @@
    }
    ```
 
-3. 默认的登陆超时时间为1分钟，这个时间可以在`DAO/CookieDaoImpl.java`中第7行修改。
+4. 默认的登陆超时时间为1分钟，这个时间可以在`DAO/CookieDaoImpl.java`中第7行修改。
 
-4. 可以在`DAO/UserDaoImpl.java`中定义更多的初始用户。
-
-### Step3 打包并运行！
+5. 可以在`DAO/UserDaoImpl.java`中定义更多的初始用户。
 
 建议打成jar包后上传到有jre环境的服务器，就可以运行了！
+
+### 部署方法二：docker构建
+
+将如下内容拷贝到一个新建的Dockerfile文件中，例如将文件名命名为webserver
+
+```dockerfile
+FROM openjdk
+
+EXPOSE 9000/tcp 
+
+ADD https://github.com/jingjiecb/SocketWebServer/releases/download/5.0/HttpServer_v5.jar /root/
+
+RUN mkdir /home/web/
+
+CMD java -jar /root/HttpServer_v5.jar
+```
+
+在Dockerfile文件的目录下，使用docker，构建镜像：`docker build -f webserver -t jsws .`其中-f后面的参数可以替换为你的Dockerfile名，而jsws是生成的镜像名。
+
+构建成功后，通过`docker run -d -p 9000:9000 -v /root/web:/home/web jsws`把镜像跑起来。-p参数中指定的容器端口应为9000，而-v参数后指定的容器挂载目录应为/home/web（网站根目录挂载），宿主机端口和宿主机挂载的网站根目录可以自由指定。请不要在最后加多余的参数命令，否则可能导致java -jar命令失效。
+
+### 准备网站根目录
+
+确保你的网站根目录下有如下三个文件：
+
+1. login.html
+2. register.html
+3. index.html
+
+我已经在resources/中提供了一个参考版本，你可以简单修改之后使用，也可以编写自己的，但是有以下2点必须注意：
+
+1. 将login.html中的表单(form)的action属性改为`你的服务器地址:端口号+/login`，将register.html中表单的action属性改为`你的服务器地址:端口号+/register`
+2. 将所有url修改为你的url。
 
 ## 项目结构
 
