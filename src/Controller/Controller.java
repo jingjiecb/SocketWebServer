@@ -13,8 +13,6 @@ import java.util.Date;
 
 public class Controller {
 
-    private static final String URL_HOME = "http://js.aegean19.top:9000";
-
     //请求解析器
     private Parser parser;
     //socket输出流
@@ -97,15 +95,15 @@ public class Controller {
 
         if (path.equals("/login")) {//如果是来自登陆页面的post
             if (userDao.isMatch(userName, passwd)) {//如果用户密码正确，颁发一个cookie给浏览器
-                new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName), URL_HOME).send();
+                new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName)).send();
             } else {//如果用户密码错误，则重定向回登陆页面
-                new C301Responser(outputStream, URL_HOME + "/login.html").send();
+                new C301Responser(outputStream, "/login.html").send();
             }
         } else if (path.equals("/register")) {//如果是来自于注册页面的post，添加一个用户
             if (userDao.addUser(userName, passwd)) {
-                new C301Responser(outputStream, URL_HOME + "/login.html").send();//注册成功跳转到登陆页面
+                new C301Responser(outputStream, "/login.html").send();//注册成功跳转到登陆页面
             } else {
-                new C301Responser(outputStream, URL_HOME + "/register.html").send();//注册失败跳转到注册页面
+                new C301Responser(outputStream, "/register.html").send();//注册失败跳转到注册页面
             }
         }
     }
@@ -121,7 +119,7 @@ public class Controller {
         if (!cookieDao.isValid(nameCookie)) {
             if (!parser.hasCheckModified()) {
                 // no 304 check
-                if (!interceptBeforeLogin()) new C302Responser(outputStream, URL_HOME + "/login.html").send();
+                if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
                 else sendFile();
             } else {
                 // check if 304
