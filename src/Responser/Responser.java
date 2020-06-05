@@ -13,7 +13,11 @@ abstract public class Responser {
     // protected static final String BASEURL="http://127.0.0.1:9000";
 
     //资源根目录
-    protected static final String BASEPATH = "/home/web";
+    protected static String BASEPATH = "/home/web";
+
+    public static void setBasePath(String path){ BASEPATH=path; }
+
+    public static String getBasePath(){return BASEPATH;}
 
     protected OutputStream outputStream;
 

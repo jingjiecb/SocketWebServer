@@ -65,7 +65,8 @@ public class Controller {
      * @return 如果访问合法返回true，否则返回false
      */
     private boolean interceptAfterLogin() {
-        return !parser.getPath().contains("..");
+        String path = parser.getPath();
+        return !(path.contains("..") || path.equals("/"));
     }
 
     /**
@@ -116,30 +117,40 @@ public class Controller {
     private void processGet() throws Exception {
         String nameCookie = parser.getCookieByKey("username");
 
-        if (!cookieDao.isValid(nameCookie)) {
-            if (!parser.hasCheckModified()) {
-                // no 304 check
-                if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
-                else sendFile();
-            } else {
-                // check if 304
-                File theFile = new File(parser.getPath());
-                Date fileLastModTime = new Date(theFile.lastModified());
-                Date clientModSince = parser.getModifiedDate();
-                if (fileLastModTime.getTime() > clientModSince.getTime()) {
-                    sendFile();
-                } else {
-                    new C304Responser(outputStream).send();
-                }
-            }
-        } else {
-            if (!interceptAfterLogin()) new C404Responser(outputStream);
-            else {
+        if (!cookieDao.isValid(nameCookie)) {// 请求无有效cookie
+            // 按照登录前进行处理
+            if (!interceptBeforeLogin()) new C302Responser(outputStream, "/login.html").send();
+            else sendFile();
+        } else {// 请求有有效cookie
+
+            // 登录后拦截器，防止非法请求利用
+            if (!interceptAfterLogin()) new C301Responser(outputStream,"/index.html").send();
+            else { //合法请求，接受处理
+                // 重定向检查
                 String redirectPath = redirect();
-                if (redirectPath.equals("")) sendFile();
-                else new C302Responser(outputStream, redirectPath).send();
-            }
-        }
+
+                // 不需要重定向
+                if (redirectPath.equals("")) {
+                    // 304 检查
+                    if (!parser.hasCheckModified()) {
+                        // no 304 check
+                        sendFile();
+                    } else {
+                        // check if 304
+                        File theFile = new File(parser.getPath());
+                        Date fileLastModTime = new Date(theFile.lastModified());
+                        Date clientModSince = parser.getModifiedDate();
+                        if (fileLastModTime.getTime() > clientModSince.getTime()) {
+                            sendFile();
+                        } else {
+                            new C304Responser(outputStream).send();
+                        }
+                    }
+                }
+                else new C302Responser(outputStream, redirectPath).send();//需要重定向
+
+            }// 合法请求
+        }//cookie检查
     }
 
     /**
