@@ -19,10 +19,6 @@
 
 **简单修改源代码（可选）**：
 
-1. 将Responser包中`Responser.java`中第16行，可以将`BASEPATH`常量改为你期望的网站根目录。
-
-2. 为了避免冲突，默认端口是`9000`。如果需要更改，需要将`Server.java`中第10行中的端口改掉。
-
 3. Controller包的`Controller.java`中第78行，有如下方法：
 
    ```java
@@ -45,27 +41,21 @@
 
 5. 可以在`DAO/UserDaoImpl.java`中定义更多的初始用户。
 
-建议打成jar包后上传到有jre环境的服务器，就可以运行了！
+建议打成jar包运行。
+
+运行时可以**指定参数**：
+
+- 如果不带有任何参数运行，则保持默认端口`9000`和默认网站根目录`/home/web`
+- 如果想自定义网站根目录，请只输入一个参数，是网站的根目录绝对路径。
+- 如果想自定义网站根目录和端口，请输入两个参数，第一个是网站的根目录，第二个是端口号。
 
 ### 部署方法二：docker构建
 
-将如下内容拷贝到一个新建的Dockerfile文件中，例如将文件名命名为webserver
+一键拉取运行：
 
-```dockerfile
-FROM openjdk
-
-EXPOSE 9000/tcp 
-
-ADD https://github.com/jingjiecb/SocketWebServer/releases/download/5.0/HttpServer_v5.jar /root/
-
-RUN mkdir /home/web/
-
-CMD java -jar /root/HttpServer_v5.jar
 ```
-
-在Dockerfile文件的目录下，使用docker，构建镜像：`docker build -f webserver -t jsws .`其中-f后面的参数可以替换为你的Dockerfile名，而jsws是生成的镜像名。
-
-构建成功后，通过`docker run -d -p 9000:9000 -v /root/web:/home/web jsws`把镜像跑起来。-p参数中指定的容器端口应为9000，而-v参数后指定的容器挂载目录应为/home/web（网站根目录挂载），宿主机端口和宿主机挂载的网站根目录可以自由指定。请不要在最后加多余的参数命令，否则可能导致java -jar命令失效。
+docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:2.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:2.0
+```
 
 ### 准备网站根目录
 
