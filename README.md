@@ -75,10 +75,7 @@ CMD java -jar /root/HttpServer_v5.jar
 2. register.html
 3. index.html
 
-我已经在resources/中提供了一个参考版本，你可以简单修改之后使用，也可以编写自己的，但是有以下2点必须注意：
-
-1. 将login.html中的表单(form)的action属性改为`你的服务器地址:端口号+/login`，将register.html中表单的action属性改为`你的服务器地址:端口号+/register`
-2. 将所有url修改为你的url。
+我已经在resources/中提供了一个参考版本，你可以简单修改之后使用。
 
 ## 项目结构
 
