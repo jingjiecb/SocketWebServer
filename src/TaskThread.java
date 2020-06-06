@@ -1,5 +1,4 @@
 import Controller.Controller;
-import Parser.Parser;
 import Responser.*;
 
 import java.io.*;
@@ -16,24 +15,19 @@ public class TaskThread extends Thread {
 
     public void run() {
         BufferedReader reader;
-        char[] postContent;
+        char[] request;
 
         try {
             OutputStream outputStream = s.getOutputStream();
 
             //读取请求
-            postContent = new char[1024];
+            request = new char[1024];
             reader = new BufferedReader(new InputStreamReader(s.getInputStream()));
-            int co = reader.read(postContent);
+            int co = reader.read(request);
             assert co > 0;
 
-            //解析请求
-            Parser parser = new Parser(postContent);
-            parser.print();
-
             //处理请求，给出应答
-            Controller controller=new Controller();
-            controller.process(parser,outputStream);
+            new Controller().process(request,outputStream);
 
             s.close();
         } catch (Exception e) {

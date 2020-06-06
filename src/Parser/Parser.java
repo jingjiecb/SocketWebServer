@@ -24,7 +24,6 @@ public class Parser {
         String requestStr = String.valueOf(request).replaceAll("[\r\u0000]", "");
         // System.out.println("total length: "+requestStr.length());
         this.lines = requestStr.split("\n");
-        // Why Not Directly .split("\r\n")????
     }
 
     /**
@@ -104,6 +103,8 @@ public class Parser {
 
         return res.toString();
     }
+
+
 
     public boolean hasCheckModified(){
         // check if possibly response HTTP 304

@@ -17,12 +17,12 @@ public class Server {
                 PORT = Integer.parseInt(args[1]);
             }
         }catch (Exception e){
-            System.out.println("Error | Invalid parameters!");
+            System.out.println("\033[31m"+"Error | Invalid parameters!");
             System.out.println("Help information:");
             System.out.println("If you only want to custom base path, please input ONLY one parameter. DO NOT end with '/' ");
             System.out.println("If you want to custom base path and port, please put base path first and port second.");
             System.out.println("If you don't input any parameters, the default base path is /home/web and the default port is 9000.");
-            System.out.println("Try again!");
+            System.out.println("Try again!"+"\033[0m");
             return;
         }
 
@@ -34,10 +34,10 @@ public class Server {
             e.printStackTrace();
         }
 
-        System.out.println("**********JAVA SOCKET WEB SERVER**********");
-        System.out.println("Info | running on port "+PORT);
-        System.out.println("Info | Website base path is: "+Responser.getBasePath());
-        System.out.println("******************************************");
+        System.out.println("\033[32m"+"**********JAVA SOCKET WEB SERVER**********");
+        System.out.println("INFO | Running on port "+PORT);
+        System.out.println("INFO | Website base path is: "+Responser.getBasePath());
+        System.out.println("******************************************"+"\033[0m");
 
         while(true) {
             try {

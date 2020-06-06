@@ -19,27 +19,9 @@
 
 **简单修改源代码（可选）**：
 
-3. Controller包的`Controller.java`中第78行，有如下方法：
-
-   ```java
-   private String redirect() {
-       return "";
-   }
-   ```
-
-   可以在这个方法中定义一些临时的资源重定向（即页面跳转），例如
-
-   ```java
-   private String redirect() {
-       if (path.equals("/old.html")) return URL_HOME+"/new.html";
-       else if(path.equals("/baidu")) return "www.baidu.com";
-       else return "";
-   }
-   ```
-
-4. 默认的登陆超时时间为1分钟，这个时间可以在`DAO/CookieDaoImpl.java`中第7行修改。
-
+1. 默认的登陆超时时间为1分钟，这个时间可以在`DAO/CookieDaoImpl.java`中第7行修改。
 5. 可以在`DAO/UserDaoImpl.java`中定义更多的初始用户。
+3. 可以在`Controller/Controller.java`的27行找到`REDIRECT_MAP`常量，在这里可以添加302重定向规则。只需在括号中加入`put(<原地址>, <重定向地址>);`即可。
 
 建议打成jar包运行。
 
@@ -54,7 +36,7 @@
 一键拉取运行：
 
 ```
-docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:2.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:2.0
+docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0
 ```
 
 ### 准备网站根目录
