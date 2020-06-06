@@ -31,15 +31,7 @@
 - 如果想自定义网站根目录，请只输入一个参数，是网站的根目录绝对路径。
 - 如果想自定义网站根目录和端口，请输入两个参数，第一个是网站的根目录，第二个是端口号。
 
-### 部署方法二：docker构建
-
-一键拉取运行：
-
-```
-docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0
-```
-
-### 准备网站根目录
+**准备网站根目录**
 
 确保你的网站根目录下有如下三个文件：
 
@@ -48,6 +40,16 @@ docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0 && docker 
 3. index.html
 
 我已经在resources/中提供了一个参考版本，你可以简单修改之后使用。
+
+### 部署方法二：docker构建
+
+我已经制作好了docker镜像，包含一个最新的jar包和我的示例网站资源，可以一键拉取运行：
+
+```
+docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0
+```
+
+之后就可以访问本机的9000端口看到效果。
 
 ## 项目结构
 
