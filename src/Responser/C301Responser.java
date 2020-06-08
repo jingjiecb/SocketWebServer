@@ -14,11 +14,11 @@ public class C301Responser extends Responser {
 
     @Override
     public boolean send() throws Exception {
-        PrintStream writer = new PrintStream(outputStream);
-        writer.println("HTTP/1.1 301 Move Permanently");
-        writer.println("Location: " + url);
-        writer.flush();
-        writer.close();
-        return true;
+        try(PrintStream writer = new PrintStream(outputStream)) {
+            writer.println("HTTP/1.1 301 Move Permanently");
+            writer.println("Location: " + url);
+            writer.flush();
+            return true;
+        }
     }
 }

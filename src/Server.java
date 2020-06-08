@@ -17,11 +17,12 @@ public class Server {
                 PORT = Integer.parseInt(args[1]);
             }
         }catch (Exception e){
-            System.out.println("\033[31m"+"Error | Invalid parameters!");
-            System.out.println("Help information:");
+            System.out.println("\033[31m"+"Error | Invalid parameters!\n");
+            System.out.println("********** Help information **********");
             System.out.println("If you only want to custom base path, please input ONLY one parameter. DO NOT end with '/' ");
             System.out.println("If you want to custom base path and port, please put base path first and port second.");
             System.out.println("If you don't input any parameters, the default base path is /home/web and the default port is 9000.");
+            System.out.println("Make sure your port is free.");
             System.out.println("Try again!"+"\033[0m");
             return;
         }

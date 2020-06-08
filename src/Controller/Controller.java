@@ -28,6 +28,7 @@ public class Controller {
         {
             put("/", "/index.html");
             put("/baidu", "https://www.baidu.com");
+            put("/music.mp3", "/test.mp3");
         }
     };
 
@@ -76,10 +77,19 @@ public class Controller {
     private void processPost() throws Exception {
         String path = parser.getPath();
 
-        if (path.equals("/login")) {//如果是来自登陆页面的post
-            login();// 处理登陆
-        } else if (path.equals("/register")) {//如果是来自于注册页面的post
-            register();// 处理注册
+        switch (path) {
+            case "/login": //如果是来自登陆页面的post
+                login();// 处理登陆
+
+                break;
+            case "/register": //如果是来自于注册页面的post
+                register();// 处理注册
+
+                break;
+            case "/logout": //如果是登出请求
+                logout();//处理登出
+
+                break;
         }
     }
 
@@ -87,15 +97,23 @@ public class Controller {
      * 处理登陆
      */
     private void login() throws Exception {
-        String content = parser.getContent();
-        String[] pairs = content.split("&");
-        assert pairs.length == 2;
-        String userName = (pairs[0].split("="))[1];
-        String passwd = (pairs[1].split("="))[1];
+        try {
+            String content = parser.getContent();
+            String[] pairs = content.split("&");
 
-        if (userDao.isMatch(userName, passwd)) {//如果用户密码正确，颁发一个cookie给浏览器
-            new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName)).send();
-        } else {//如果用户密码错误，则重定向回登陆页面
+            String[] userNameInfo = pairs[0].split("=");
+            String[] passwdInfo = pairs[1].split("=");
+
+            String userName = userNameInfo[1];
+            String passwd = passwdInfo[1];
+
+            if (userDao.isMatch(userName, passwd)) {//如果用户密码正确，颁发一个cookie给浏览器
+                new SetCookieResponser(outputStream, cookieDao.getNewCookie(userName)).send();
+                System.out.println("\033[31;4m" + "info ===> user login: " + userName + "\033[0m");
+            } else {//如果用户密码错误，则重定向回登陆页面
+                new C302Responser(outputStream, "/login.html").send();
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
             new C302Responser(outputStream, "/login.html").send();
         }
     }
@@ -104,18 +122,33 @@ public class Controller {
      * 处理注册
      */
     private void register() throws Exception {
-        String content = parser.getContent();
-        String[] pairs = content.split("&");
-        assert pairs.length == 3;
-        String userName = (pairs[0].split("="))[1];
-        String passwd = (pairs[1].split("="))[1];
-        String passwdRe = (pairs[2].split("="))[1];
+        try {
+            String content = parser.getContent();
+            String[] pairs = content.split("&");
+            assert pairs.length == 3;
+            String userName = (pairs[0].split("="))[1];
+            String passwd = (pairs[1].split("="))[1];
+            String passwdRe = (pairs[2].split("="))[1];
 
-        if (passwd.equals(passwdRe) && userDao.addUser(userName, passwd)) {
-            new C301Responser(outputStream, "/login.html").send();//注册成功跳转到登陆页面
-        } else {
-            new C302Responser(outputStream, "/register.html").send();//两次输入密码不一致，或者已有重复用户名存在，不予注册，弹回注册页面重新输入信息
+            if (passwd.equals(passwdRe) && userDao.addUser(userName, passwd)) {
+                new C301Responser(outputStream, "/login.html").send();//注册成功跳转到登陆页面
+                System.out.println("\033[31;4m" + "info ===> new user register: " + userName + "\033[0m");
+            } else {
+                new C302Responser(outputStream, "/register.html").send();//两次输入密码不一致，或者已有重复用户名存在，不予注册，弹回注册页面重新输入信息
+            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            new C302Responser(outputStream, "/register.html").send();
         }
+    }
+
+    /**
+     * 处理登出
+     */
+    private void logout() throws Exception {
+        String cookie = parser.getCookie();
+        cookieDao.disableCookie(cookie);
+        new C301Responser(outputStream, "/login.html").send();//成功删除cookie，则回到登录界面
+        System.out.println("\033[31;4m" + "info ===> logout: " + cookie + "\033[0m");
     }
 
     /**
@@ -232,7 +265,7 @@ public class Controller {
                 return false;
             } else {
                 new C304Responser(outputStream).send();
-                System.out.println("\033[31;4m" + "info ===> 304: "+theFile+"\033[0m");
+                System.out.println("\033[31;4m" + "info ===> 304: " + theFile + "\033[0m");
                 return true;
             }
         }

@@ -15,6 +15,8 @@ public class C500Responser extends Responser {
             outputStream=socket.getOutputStream();
             outputStream.flush();
             sendCodeAndText("500 Internal Server Error");
+            outputStream.close();
+            socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

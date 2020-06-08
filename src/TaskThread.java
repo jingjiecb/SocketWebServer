@@ -17,9 +17,7 @@ public class TaskThread extends Thread {
         BufferedReader reader;
         char[] request;
 
-        try {
-            OutputStream outputStream = s.getOutputStream();
-
+        try (OutputStream outputStream = s.getOutputStream()){
             //读取请求
             request = new char[1024];
             reader = new BufferedReader(new InputStreamReader(s.getInputStream()));

@@ -23,4 +23,11 @@ public interface CookieDao {
      */
     String getNewCookie(String userName);
 
+    /**
+     * 使一个Cookie失效
+     * @param cookieStr 服务端接受到的请求报文头中的Cookie字段。格式形如： "username=admin"
+     * @return 如果找到对应cookie并成功删除则返回true，没找到cookie则返回false
+     */
+    boolean disableCookie(String cookieStr);
+
 }

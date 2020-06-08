@@ -45,4 +45,18 @@ public class CookieDaoImpl implements CookieDao {
         if (!isValid(cookie.toString())) cookies.add(cookie);
         return cookie.toString();
     }
+
+    @Override
+    public boolean disableCookie(String cookieStr){
+        boolean exist=false;//cookieStr是否存在于cookies
+        for (int i = 0; i < cookies.size(); i++) {
+            Cookie cookie = cookies.get(i);
+            if ((cookie.toString()).equals(cookieStr)) {
+                cookies.remove(cookie);//如果cookie存在则删除该cookie；
+                exist=true;
+                i--;
+            }
+        }
+        return exist;
+    }
 }

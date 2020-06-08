@@ -53,7 +53,7 @@ public class Parser {
         for (String line : lines) {
             if (line.startsWith("Cookie:")) return line.substring(8);
         }
-        return null;
+        return "";
     }
 
     /**
@@ -78,7 +78,7 @@ public class Parser {
             }
         }
 
-        return null;
+        return "";
     }
 
     /**

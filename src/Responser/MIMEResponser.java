@@ -24,30 +24,27 @@ public class MIMEResponser extends Responser {
 
         if (file.exists()) {
 
-            PrintStream writer = new PrintStream(outputStream);
-            DataOutputStream os = new DataOutputStream(outputStream);
-            //发送响应头
-            writer.println("HTTP/1.1 200 OK");
-            writer.println(getMimeType());
+            try (PrintStream writer = new PrintStream(outputStream); DataOutputStream os = new DataOutputStream(outputStream); FileInputStream in = new FileInputStream(path)) {
+                //发送响应头
+                writer.println("HTTP/1.1 200 OK");
+                writer.println(getMimeType());
 
-            FileInputStream in = new FileInputStream(path);
-            writer.println("Content-Lenth:" + in.available());
-            writer.println();
-            writer.flush();
+                writer.println("Content-Lenth:" + in.available());
+                writer.println();
+                writer.flush();
 
-            //发送响应体
-            byte[] b = new byte[1024];
-            int len = 0;
-            len = in.read(b);
-            while (len != -1) {
-                os.write(b, 0, len);
+                //发送响应体
+                byte[] b = new byte[1024];
+                int len = 0;
                 len = in.read(b);
-            }
+                while (len != -1) {
+                    os.write(b, 0, len);
+                    len = in.read(b);
+                }
 
-            os.flush();
-            os.close();
-            writer.close();
-            return true;
+                os.flush();
+                return true;
+            }
         } else {
             return false;
         }
@@ -55,6 +52,7 @@ public class MIMEResponser extends Responser {
 
     /**
      * 得到MIME类型的描述
+     *
      * @return MIME类型描述
      */
     private String getMimeType() {

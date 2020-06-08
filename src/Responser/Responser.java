@@ -33,14 +33,14 @@ abstract public class Responser {
      * @throws Exception 一切异常
      */
     protected void sendCodeAndText(String codeAndText) throws Exception{
-        PrintStream writer = new PrintStream(outputStream);
-        writer.println("HTTP/1.1 "+codeAndText);
-        writer.println("Content-Type:text/plain");
-        writer.println("Content-Length:"+codeAndText.length());
-        writer.println();
-        //发送响应体
-        writer.print(codeAndText);
-        writer.flush();
-        writer.close();
+        try(PrintStream writer = new PrintStream(outputStream)) {
+            writer.println("HTTP/1.1 " + codeAndText);
+            writer.println("Content-Type:text/plain");
+            writer.println("Content-Length:" + codeAndText.length());
+            writer.println();
+            //发送响应体
+            writer.print(codeAndText);
+            writer.flush();
+        }
     }
 }

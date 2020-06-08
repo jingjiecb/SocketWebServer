@@ -11,11 +11,11 @@ public class C304Responser extends Responser {
 
     @Override
     public boolean send() throws Exception {
-        PrintStream writer = new PrintStream(outputStream);
-        writer.println("HTTP/1.1 304 NotModified");
-        // tell the client/browser that it can use its buffer
-        writer.flush();
-        writer.close();
-        return true;
+        try(PrintStream writer = new PrintStream(outputStream)) {
+            writer.println("HTTP/1.1 304 NotModified");
+            // tell the client/browser that it can use its buffer
+            writer.flush();
+            return true;
+        }
     }
 }
