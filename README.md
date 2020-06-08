@@ -6,6 +6,7 @@
 
 - 用户登陆
 - 用户注册
+- 用户登出
 - 可以处理请求并根据情况发送200、301、302、304、404、405、500七种状态码
 - 支持html文本、plaintext、jpeg、mpeg4、png、pdf、zip七种MIME类型数据的发送。
 
@@ -33,20 +34,20 @@
 
 **准备网站根目录**
 
-确保你的网站根目录下有如下三个文件：
+确保你的网站根目录下至少有如下三个文件：
 
 1. login.html
 2. register.html
 3. index.html
 
-我已经在resources/中提供了一个参考版本，你可以简单修改之后使用。
+我已经在resources/中提供了一套可供参考的网站根目录资源，你可以简单修改之后使用。
 
 ### 部署方法二：docker构建
 
 我已经制作好了docker镜像，包含一个最新的jar包和我的示例网站资源，可以一键拉取运行：
 
 ```
-docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0
+docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0
 ```
 
 之后就可以访问本机的9000端口看到效果。
@@ -64,10 +65,10 @@ docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:3.0 && docker 
 3. TaskThread实例化一个Controller对象，并将Socket的输出流和Parser对象的引用交给它。
 4. Controller首先判断请求的方法（这里只处理POST和GET两种），如果方法非法就实例化C405Responser对象发送405状态应答报文。如果方法合法，则会根据方法选择交给processGet()或者processPost()方法。
 5. 在processPost()中，如果是登陆请求，调用UserDao的接口方法查询卡密是否正确，如果正确就颁发一个Cookie给来者；否则弹回登陆页面。如果是注册请求，调用UserDao的addUser方法添加用户信息。
-6. 在processGet()中，首先判断请求是否需要被拦截（没有Cookie的资源访问请求和企图访问上级目录的请求将被拦截），拦截后对页面重定向。然后判断是否匹配设定好的资源重定向记录（通过redirect方法），如果不需要重定向，则尝试将请求的内容取出并应答。请求的资源不存在时会产生404应答，资源存在时则根据资源的类型指定MIME类型，并发回应答报文。
+6. 在processGet()中，首先按照拦截规则，判断请求是否需要被拦截。然后判断根据重定向规则进行匹配，判断是否需要重定向。如果不需要重定向，则尝试将请求的内容取出并应答。请求的资源不存在时会产生404应答，资源存在时则根据资源的类型指定MIME类型，并发回应答报文。
 7. 一切异常会抛出到TaskServer处理，处理的方式为尝试发回500应答报文。
 
-其中UserDao和CookieDao都使用单件模式，确保不会出现被多次创建造成逻辑错误。
+其中UserDao和CookieDao都使用单件模式，确保不会出现被多次创建造成逻辑错误。另外，对文件流的问题进行修正后，确保文件流能够正常关闭。
 
 ## 展示
 
