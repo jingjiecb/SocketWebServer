@@ -1,8 +1,22 @@
 package Responser;
 
 import java.io.*;
+import java.util.HashMap;
 
 public class MIMEResponser extends Responser {
+    private static HashMap<String, String> mimeTable = new HashMap<String, String>() {
+        {
+            put(".html", "Content-Type:text/html");
+            put(".htm", "Content-Type:text/html");
+            put(".jpg","Content-Type:image/jpeg");
+            put(".css","Content-Type:text/css");
+            put(".mp4","Content-Type:video/mpeg4");
+            put(".png","Content-Type:image/png");
+            put(".pdf","Content-Type:application/pdf");
+            put(".zip","Content-Type:application/zip");
+            put(".mp3","Content-Type:audio/mp3");
+        }
+    };
 
     private String path;
 
@@ -56,26 +70,13 @@ public class MIMEResponser extends Responser {
      * @return MIME类型描述
      */
     private String getMimeType() {
-        String res = "";
+        String res = "Content-Type:application/octet-stream";
 
-        if (path.endsWith(".html") || path.endsWith(".htm")) {
-            res = "Content-Type:text/html";
-        } else if (path.endsWith(".jpg")) {
-            res = "Content-Type:image/jpeg";
-        } else if (path.endsWith(".css")) {
-            res = "Content-Type:text/css";
-        } else if (path.endsWith(".mp4")) {
-            res = "Content-Type:video/mpeg4";
-        } else if (path.endsWith(".png")) {
-            res = "Content-Type:image/png";
-        } else if (path.endsWith(".pdf")) {
-            res = "Content-Type:application/pdf";
-        } else if (path.endsWith(".zip")) {
-            res = "Content-Type:application/zip";
-        } else if (path.endsWith(".mp3")) {
-            res = "Content-Type:audio/mp3";
-        } else {
-            res = "Content-Type:application/octet-stream";
+        for (String fileType : mimeTable.keySet()){
+            if (path.endsWith(fileType)){
+                res=mimeTable.get(fileType);
+                break;
+            }
         }
 
         return res;
