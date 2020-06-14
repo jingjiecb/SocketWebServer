@@ -14,17 +14,25 @@
 
 纯粹使用`Java Socket API`进行编写，不使用任何相关框架。
 
-## 部署说明
+## Quick Start
 
-### 部署方法一：源代码打包构建
+### Docker
 
-**简单修改源代码（可选）**：
+我已经制作好了docker镜像，包含一个最新的jar包和我的示例网站资源，可以一键拉取运行：
+
+```
+docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0
+```
+
+之后就可以访问本机的9000端口看到效果。
+
+### jar包
+
+已在release中提供现成的jar包可供下载。如果你想定制自己的服务器，也可以对源代码进行简单修改定制：
 
 1. 默认的登陆超时时间为1分钟，这个时间可以在`DAO/CookieDaoImpl.java`中第7行修改。
 5. 可以在`DAO/UserDaoImpl.java`中定义更多的初始用户。
 3. 可以在`Controller/Controller.java`的27行找到`REDIRECT_MAP`常量，在这里可以添加302重定向规则。只需在括号中加入`put(<原地址>, <重定向地址>);`即可。
-
-建议打成jar包运行。
 
 运行时可以**指定参数**：
 
@@ -42,77 +50,60 @@
 
 我已经在resources/中提供了一套可供参考的网站根目录资源，你可以简单修改之后使用。
 
-### 部署方法二：docker构建
-
-我已经制作好了docker镜像，包含一个最新的jar包和我的示例网站资源，可以一键拉取运行：
-
-```
-docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0 && docker run -d -p 9000:9000 registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0
-```
-
-之后就可以访问本机的9000端口看到效果。
-
 ## 项目结构
 
 下图是一个简单的类关系示意图：
 
 ![ServerSocketClasses](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/SocketServer.png)
 
-具体的**工作流程**如下：
+大致的**工作流程**如下：
 
 1. Server监听9000默认端口，一旦有连接则创建一个TaskThread对象，并把ServerSocket.accept()方法返回的Socket对象传给这个新线程。
-2. TaskThread线程对象从Socket的输入流中读出完整的Http请求报文，并以此为参数构造Parser对象，Parser对象可以处理请求，用几个简单的方法获得请求中有价值的内容。
-3. TaskThread实例化一个Controller对象，并将Socket的输出流和Parser对象的引用交给它。
-4. Controller首先判断请求的方法（这里只处理POST和GET两种），如果方法非法就实例化C405Responser对象发送405状态应答报文。如果方法合法，则会根据方法选择交给processGet()或者processPost()方法。
-5. 在processPost()中，如果是登陆请求，调用UserDao的接口方法查询卡密是否正确，如果正确就颁发一个Cookie给来者；否则弹回登陆页面。如果是注册请求，调用UserDao的addUser方法添加用户信息。
-6. 在processGet()中，首先按照拦截规则，判断请求是否需要被拦截。然后判断根据重定向规则进行匹配，判断是否需要重定向。如果不需要重定向，则尝试将请求的内容取出并应答。请求的资源不存在时会产生404应答，资源存在时则根据资源的类型指定MIME类型，并发回应答报文。
-7. 一切异常会抛出到TaskServer处理，处理的方式为尝试发回500应答报文。
-
-其中UserDao和CookieDao都使用单件模式，确保不会出现被多次创建造成逻辑错误。另外，对文件流的问题进行修正后，确保文件流能够正常关闭。
+2. TaskThread线程对象从Socket的输入流中读出完整的Http请求报文，实例化Controller处理请求。
+3. Controller中实例化Parser，负责提取请求中的有用信息。
+4. Controller判断请求的方法（这里只处理POST和GET两种），并交给processGet和processPost方法处理。
+5. processPost实现对用户登录、注册、登出的处理。
+6. processGet实现拦截、重定向请求，并会根据请求头做出发送403还是具体文件内容的判断。
 
 ## 展示
 
-登陆页面，输入正确的用户名和密码后方可登陆，获得服务端的Cookie，默认一分钟后失效。
+登陆页面。可以输入用户密码登陆，也可以点击注册跳转到注册页面。
 
-![login](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/login.jpg)
+![登陆](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/1.jpg)
 
-注册页面，输入用户名和密码后注册(其中确认输入密码并无卵用qwq)：
+注册页面。可以输入用户名和两次密码注册，也可以点击登陆回到登陆页面。
 
-![register](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/register.jpg)
+![注册](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/2.jpg)
 
-登陆成功后跳转到首页，这里呈现了一些资源：
+资源页面。也可以浏览资源，也可以点击登出，退出登陆。
 
-![index](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/index.jpg)
+![资源](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/3.jpg)
 
-点击图片时，因为有MIME类型声明，所以浏览器会默认查看图片而不是下载：
+图片资源。服务器可以正常地处理图片资源，浏览器默认显示而不是下载。
 
-![jpg](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/jpg.jpg)
+![图片](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/4.jpg)
 
-可以下载音乐、视频、压缩包、电子书资源：
+音乐资源。这类资源IE中默认下载。
 
-![mp3](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/mp3.jpg)
+![音乐](https://clwasblog-1301107071.cos.ap-shanghai.myqcloud.com/img/StudyNote/internet/SocketServer/5.jpg)存在的问题
 
-## 存在的问题
+不得不说，这还是个很简陋的web服务器，存在一些风险和问题：
 
-不得不说，这还是个很简陋的web服务器，存在很多风险和问题，具体如下：
-
-1. 没有对注册用户的第二次输入密码进行校验。
-2. 没有验证码等任何措施阻止恶意的频繁登陆和注册请求。
 3. **不能处理带有中文的请求。**可能需要处理一下编码相关问题。
-4. 偶尔会出现输入输出流的异常，而且很多时候无法利索地处理。如果信息已经发送中途发生异常，再发送500应答很可能造成文件的损坏，和一系列其他问题。
-5. 发送文件时没有告知接受者文件的大小，导致接收方不能预估文件下载时间。这一点应该比较好修复。
-6. 不支持续传。
-7. 可能存在容易被攻击者利用的漏洞。
+4. 对于浏览器重置连接的行为无法正常处理，只能抛出异常。
+5. 发送文件时不告知接受者文件的大小。
+4. ...
 
 如果你有什么好的想法可以帮助改进，欢迎在issue中提出！
 
 ## 展望
 
-除了可以解决上面提到的问题，这个项目还有很大的补充完善空间。下面是一些我能想到的完善角度：
+除了可以解决上面提到的问题，这个项目还有很大的补充完善空间，例如：
 
 1. 支持更多的MIME类型和状态码
 2. 支持自动根据根目录资源来生成主页页面
 3. 支持嵌套目录结构的浏览
-4. ...待补充
+4. ...
 
 所以这其实只是一个互联网课程的大作业qwq
+

@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.HashMap;
 
 public class MIMEResponser extends Responser {
-    private static HashMap<String, String> mimeTable = new HashMap<String, String>() {
+    private static final HashMap<String, String> mimeTable = new HashMap<String, String>() {
         {
             put(".html", "Content-Type:text/html");
             put(".htm", "Content-Type:text/html");
@@ -18,7 +18,7 @@ public class MIMEResponser extends Responser {
         }
     };
 
-    private String path;
+    private final String path;
 
     public MIMEResponser(OutputStream outputStream, String path) {
         this.outputStream = outputStream;
@@ -49,7 +49,7 @@ public class MIMEResponser extends Responser {
 
                 //发送响应体
                 byte[] b = new byte[1024];
-                int len = 0;
+                int len;
                 len = in.read(b);
                 while (len != -1) {
                     os.write(b, 0, len);
