@@ -104,6 +104,3 @@ docker pull registry.cn-hangzhou.aliyuncs.com/claws/socket_server:4.0 && docker 
 2. 支持自动根据根目录资源来生成主页页面
 3. 支持嵌套目录结构的浏览
 4. ...
-
-所以这其实只是一个互联网课程的大作业qwq
-
